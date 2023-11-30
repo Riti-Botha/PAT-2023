@@ -5,3 +5,23 @@
 - Log in using the following credentials:
   - **Username:** Riti
   - **Password:** 2345
+
+### Project Overview:
+This project was a graded assessment task developed in 2023 during grade 11. It involved creating a Business Management Program with comments in Afrikaans due to my school's language.
+
+#### Project Focus:
+I chose to design an inventory management system for the popular Roblox game, Royale High.
+
+#### Development Tools:
+Utilized Microsoft Access for database management and Delphi for coding, aligning with the grading criteria.
+
+### Skills Acquired:
+- Object-Oriented Programming
+- User-Defined Methods
+- Debugging techniques for large projects
+
+### Key Features:
+- Database connection and manipulation for various edit, update, and delete operations
+- Multi-form GUI designed for functionality and usability, following HCI principles
+- Implementation of a text file for input/output purposes, such as populating data structures and generating reports
+- Utilized data structures like Arrays and user-defined methods relevant to the program
