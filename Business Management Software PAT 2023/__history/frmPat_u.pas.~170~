@@ -1,0 +1,1406 @@
+unit frmPat_u;
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+
+
+// Username:
+// JuffrouBischoff
+
+// Pin:
+// 1234
+
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, dmpat_u, Data.DB,
+  Vcl.Grids, Vcl.DBGrids, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, ShellAPI;
+
+type
+  TForm2 = class(TForm)
+    tbsBody: TPageControl;
+    tbsSignIn: TTabSheet;
+    tbsItems: TTabSheet;
+    pnlLogIn: TPanel;
+    edtPin: TEdit;
+    edtName: TEdit;
+    lblName: TLabel;
+    lblPin: TLabel;
+    lblFaulty: TLabel;
+    imgLogo: TImage;
+    tbsMessage: TTabSheet;
+    dbgInfo: TDBGrid;
+    pnlHeader: TPanel;
+    imgProfile: TImage;
+    lblNameWelcome: TLabel;
+    lblInformation: TLabel;
+    pnlItems: TPanel;
+    sbxSoek: TSearchBox;
+    pnlGrn1: TPanel;
+    pnlGrn2: TPanel;
+    pnlGrn3: TPanel;
+    pnlGrn4: TPanel;
+    lblEdit: TLabel;
+    lblInsert: TLabel;
+    lblDelete: TLabel;
+    lblAlgorithm: TLabel;
+    pnlInfo: TPanel;
+    imgInspiration: TImage;
+    lblMessage: TLabel;
+    lblSlogan: TLabel;
+    pnlHeadermsg: TPanel;
+    pnlHeaderSignIn: TPanel;
+    pnlRang: TPanel;
+    imgHeaderLogo: TImage;
+    lblGender: TLabel;
+    edtGender: TEdit;
+    edtTitle: TEdit;
+    edtInfo1: TEdit;
+    edtInfo2: TEdit;
+    redInfo: TRichEdit;
+    pnlFirst: TPanel;
+    pnlNext: TPanel;
+    pnlPrevious: TPanel;
+    sbxSearchDel: TSearchBox;
+    btnHelp: TButton;
+    Image1: TImage;
+    procedure FormCreate(Sender: TObject);
+    procedure pnlLogInClick(Sender: TObject);
+    procedure pnlItemsClick(Sender: TObject);
+    procedure pnlRangClick(Sender: TObject);
+    procedure dbgInfoCellClick(Column: TColumn);
+    procedure pnlGrn1Click(Sender: TObject);
+    procedure dbgInfoDrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure pnlGrn2Click(Sender: TObject);
+    procedure pnlFirstClick(Sender: TObject);
+    procedure pnlNextClick(Sender: TObject);
+    procedure pnlPreviousClick(Sender: TObject);
+    procedure pnlGrn3Click(Sender: TObject);
+    procedure sbxSoekChange(Sender: TObject);
+    procedure sbxSearchDelChange(Sender: TObject);
+
+    function bPrime(iNum: Integer): Boolean;
+    procedure pnlGrn4Click(Sender: TObject);
+    procedure imgHeaderLogoClick(Sender: TObject);
+    procedure pnlHeaderClick(Sender: TObject);
+    procedure pnlInfoClick(Sender: TObject);
+    procedure pnlHeadermsgClick(Sender: TObject);
+    procedure imgInspirationClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+
+  private
+    { Private declarations }
+    sname: string;
+    arrNames: array [1 .. 4] of string;
+    arrPins: array [1 .. 4] of string;
+    arrItems: array [1 .. 300] of string;
+    arrSpelerNaam: array [1 .. 300] of string;
+    inume, i2, iUN: Integer;
+    bItems: Boolean;
+  public
+    { Public declarations }
+    imgR: TImage;
+  end;
+
+var
+  Form2: TForm2;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm2.btnHelpClick(Sender: TObject);
+begin // owner
+  imgR := TImage.Create(Form2);
+  // Create a dynamic component
+
+  with imgR do
+  begin
+
+    // Sit die component op sy plek en stel grootte, hoogte en ouer.
+    parent := tbsItems;
+    left := 20;
+    Height := 50;
+    top := 217;
+    width := 180;
+
+    // Sit die foto in.
+    picture.LoadFromFile('r.png');
+    imgR.Stretch := true;
+  end;
+
+end;
+
+procedure TForm2.dbgInfoCellClick(Column: TColumn);
+var
+  sprys: string;
+  rprys: real;
+begin
+
+  redInfo.Lines.Clear;
+  with dmPAT do
+  begin
+    // Wys alles in richedit en formatteer waar nodig
+    if bItems = true then
+    // Wanneer items wys en wanneer spelers wys moet twee verskillende aksies gebeur
+    begin
+      sprys := currtostr(tblItems['Prys']);
+      rprys := strtofloat(sprys);
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin
+      // sit opskrifte in en wys in richedtit
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+  end;
+end;
+
+procedure TForm2.dbgInfoDrawColumnCell(Sender: TObject; const Rect: TRect;
+  DataCol: Integer; Column: TColumn; State: TGridDrawState);
+begin
+  // formatteer die prys
+  if (Column.FieldName = 'Prys') and (not Column.Field.IsNull) then
+  begin
+    dbgInfo.Canvas.FillRect(Rect);
+    dbgInfo.Canvas.TextOut(Rect.left + 2, Rect.top + 2,
+      FormatFloat('R ###0.00', Column.Field.AsCurrency));
+  end;
+
+end;
+
+procedure TForm2.FormCreate(Sender: TObject);
+var
+  myfile: textfile;
+  i, ipos: Integer;
+  sPin, sprys, sline: string;
+  rprys: real;
+
+begin
+  // laai foto's en maak program mooi
+  imgInspiration.picture.LoadFromFile('MAX.png');
+  imgInspiration.Stretch := true;
+  tbsSignIn.Visible := true;
+  tbsMessage.Visible := false;
+  tbsItems.Visible := false;
+
+  // maak databasis reg
+  bItems := false;
+  with dmPAT do
+  begin
+    tblItems.Open;
+    tblRanglys.Open;
+    tblItems.Active;
+    tblRanglys.Active;
+  end;
+
+  with dmPAT do
+
+  begin
+    // Hergee die source
+    i2 := 0;
+    dbgInfo.DataSource := dsrItems;
+    // sodat ek kan weet of items of spelers moet vertoon
+    tblItems.First;
+    bItems := true;
+    // lees in array in
+    while not tblItems.Eof and (i2 <= 300) do
+    begin
+      inc(i2);
+      arrItems[i2] := tblItems['Item'];
+      tblItems.Next;
+    end;
+
+    iUN := 0;
+    dbgInfo.DataSource := dsrRanglys;
+    tblRanglys.First;
+    bItems := false;
+    // lees in array in
+    while not tblRanglys.Eof and (iUN <= 300) do
+    begin
+      inc(iUN);
+      arrSpelerNaam[iUN] := tblRanglys['SpelerNaam'];
+      tblRanglys.Next;
+    end;
+  end;
+  // Initialize
+  inume := 0;
+  i := 0;
+  sPin := '';
+  sname := '';
+  lblGender.Caption := 'Gender?';
+  edtGender.Text := '';
+
+  // Styl en maak seker dat alles skoon begin.
+  pnlHeader.Color := rgb(14, 38, 88);
+  pnlHeadermsg.Color := rgb(14, 38, 88);
+  pnlHeader.Caption := '';
+  pnlHeadermsg.Caption := '';
+  pnlHeaderSignIn.Caption := '';
+  pnlHeaderSignIn.Color := rgb(14, 38, 88);
+  pnlGrn1.Color := rgb(35, 227, 131);
+  pnlGrn2.Color := rgb(35, 227, 131);
+  pnlGrn3.Color := rgb(35, 227, 131);
+  pnlGrn4.Color := rgb(35, 227, 131);
+  pnlLogIn.Caption := 'Log in';
+  pnlLogIn.Font.Size := 20;
+  pnlLogIn.Color := rgb(14, 38, 88);
+
+  lblInformation.Caption := 'Information';
+  lblInformation.Font.Size := 20;
+  lblMessage.Caption :=
+    'Visit the company''s website to find more useful products:';
+  lblMessage.Font.Size := 20;
+  lblSlogan.Caption := 'With REED Data, You''ll Succeed.';
+  lblSlogan.Font.Size := 20;
+  lblFaulty.Caption := '';
+  lblName.Caption := 'Username?';
+  lblPin.Caption := 'Pin?';
+
+  redInfo.Text := '';
+
+  imgLogo.picture.LoadFromFile('Logo en Naam.png');
+  imgLogo.Proportional := true;
+
+  imgHeaderLogo.picture.LoadFromFile('Logo en naam.png');
+  imgHeaderLogo.Proportional := true;
+  edtPin.Text := '';
+  edtName.Text := '';
+
+  // Lees Usernames en pins in array in vanaf textfile:
+  if FileExists('namesandpins.txt') = true then
+  begin
+    AssignFile(myfile, 'namesandpins.txt');
+  end
+  else
+  begin
+    showmessage('Error. File not found!');
+    exit;
+  end;
+
+  reset(myfile);
+  // lees name en passwords in array in
+  while not(Eof(myfile)) and (inume <= 300) do
+  begin
+    inc(inume);
+    readln(myfile, sline);
+
+    ipos := pos(';', sline);
+    arrNames[inume] := copy(sline, 1, ipos - 1);
+    arrPins[inume] := copy(sline, ipos + 1, length(sline) - ipos + 1);
+  end;
+
+  redInfo.Lines.Clear;
+  with dmPAT do
+  begin
+    // formatteer die waardes en lees in rich edit in
+    if bItems = true then
+    begin
+      sprys := currtostr(tblItems['Prys']);
+      rprys := strtofloat(sprys);
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin
+      // lees speler informasie in rich edit in
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+  end;
+
+end;
+
+procedure TForm2.imgHeaderLogoClick(Sender: TObject);
+begin
+  tbsMessage.Visible := true;
+end;
+
+procedure TForm2.imgInspirationClick(Sender: TObject);
+var
+  sURL: string;
+begin
+  // vat na webtuiste as op die prent tik
+  tbsMessage.Visible := false;
+  tbsItems.Visible := true;
+  sURL := 'https://www.matillion.com';
+  ShellExecute(0, 'open', PChar(sURL), nil, nil, SW_SHOWNORMAL);
+
+end;
+
+function TForm2.bPrime(iNum: Integer): Boolean;
+// Na statistiek deur data analiste ontleed is, het die eienaars van Royale High 'n patroon raak
+// gesien dat produkte wat se heelgetal gedeelte van die prys 'n priemgetal is, beter verkoop word.
+// -> Die pryse lyk meer oorspronklik/aanloklik/uniek aan die kopers
+
+// Hier toets ek of 'n getal 'n priemgetal is sodat die eienaars vooraf kan bepaal of die produk goed gaan verkoop.
+// Ons wil sekere pryse he wat ook nie priemgetalle is nie, om die produkte skaarser te hou.
+var
+  iCount, i: Integer;
+begin
+  Result := true;
+  iCount := 0;
+
+  if (iNum <= 1) then
+  begin
+    Result := false;
+  end
+  else
+  begin
+    for i := 1 to iNum do
+    begin
+      if (iNum mod i = 0) then
+      begin
+        inc(iCount);
+      end;
+    end;
+
+  end;
+
+  // net priemgetalle het 2
+  if (iCount = 2) then
+  begin
+    Result := true
+  end
+  else
+  begin
+    Result := false;
+  end;
+
+end;
+
+procedure TForm2.pnlFirstClick(Sender: TObject);
+VAR
+  sprys: string;
+  rprys: real;
+
+begin
+  with dmPAT do
+  begin
+
+    // hang af van wat nou wys in dbgrid
+    if bItems = true then
+    begin
+      tblItems.First;
+
+    end
+    else
+    begin
+      tblRanglys.First;
+    end;
+
+    redInfo.Lines.Clear;
+
+    // formatteer en lees inligting in rich edit
+    if bItems = true then
+    begin
+      sprys := currtostr(tblItems['Prys']);
+      rprys := strtofloat(sprys);
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+
+  end;
+end;
+
+procedure TForm2.pnlGrn1Click(Sender: TObject);
+VAR
+  sprys, snewprice, suser, sItem, sSeisoen: string;
+  rprys: real;
+  i, iCount, irang, i7, i3, irpys: Integer;
+  myfile: textfile;
+  dTry: tdate;
+  bvalid: Boolean;
+begin
+  // Edit record from redInfo
+  // Name will always be in line[2] and so on
+  // Prepare text file for report
+
+  // initialize
+  irpys := 0;
+  sprys := '';
+  rprys := 0;
+  snewprice := '';
+  sItem := redInfo.Lines[1];
+  iCount := 0;
+
+  // textfile regmaak vir gebruik
+  AssignFile(myfile, 'Changed.txt');
+  if FileExists('Changed.txt') = true then
+  begin
+    Append(myfile);
+  end
+  else
+  begin
+    rewrite(myfile);
+    exit;
+  end;
+
+  with dmPAT do
+  begin
+    // kyk of invoer data reg is
+    if bItems = true then
+    begin
+
+      if (sItem = '') or (sItem = ' ') then
+      begin
+        showmessage('Please enter an item name.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Item name is not limited to certain characters.
+      // Item name may not be a duplicate value.
+
+      if sItem <> tblItems['Item'] then
+      begin
+        // Kyk of naam van item meer as een keer gebruik word
+        iCount := 0;
+        for i7 := 1 to i2 do
+        begin
+          if sItem = arrItems[i7] then
+          begin
+            inc(iCount);
+          end;
+        end;
+
+        // Kyk of naam van item meer as een keer gebruik word
+        if iCount = 1 then
+        begin
+          showmessage('Item name may not be a duplicate value.');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      // Kyk of datum waarde ingesleutel is
+      Try
+        dTry := strtodate(redInfo.Lines[7]);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage
+            ('Unexpectedly failed. Date needs to be in format yyyy/mm/dd!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      sprys := redInfo.Lines[4];
+
+      // Vat net getal waardes (nie R vir Rand nie)
+      for i := 1 to length(sprys) do
+      begin
+        if (sprys[i] in ['0' .. '9']) or (sprys[i] = '.') then
+        begin
+          snewprice := snewprice + sprys[i];
+        end;
+      end;
+
+      // Prys moet float wees sonder , op my regional settings
+
+      Try
+        rprys := strtofloat(snewprice);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage('Unexpectedly failed. Price needs to be numbers!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      // Item kan nie ongelooflik duur of te goedkoop wees nie, spelers moet
+      // daarvoor kan betaal
+      if (rprys > 1000000) or (rprys < 2) then
+      begin
+        showmessage('Price is not in an acceptable range.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Skryf wat verander word, sodat ons kan sien hoe die besigheid groei
+      // wanneer pryse verhoog
+      Writeln(myfile, sname + 'Changed: ' + redInfo.Lines[1]);
+
+      // sit tabel in edit modus
+      tblItems.Edit;
+
+      // gee nuwe waardes
+      tblItems['Item'] := redInfo.Lines[1];
+
+      tblItems['Prys'] := strtofloat(snewprice);
+      tblItems['ItemSeisoen'] := strtodate(redInfo.Lines[7]);
+
+      // Refresh dbgrid
+      dmPAT.tblItems.Post;
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrItems;
+      closefile(myfile);
+
+      // Sit alles in array in...
+      i2 := 0;
+      tblItems.First;
+
+      // lees alle items in 'n array in om weer te kan toets of daar
+      // 'n dubbel is - kan ook agter byvoeg in array, maar dit is omtrent ewe
+      // veel lyntjies kode en werk moeiliker met fout-opspoor tegnieke
+
+      while not tblItems.Eof and (i2 <= 300) do
+      begin
+        inc(i2);
+        arrItems[i2] := tblItems['Item'];
+        tblItems.Next;
+      end;
+    end
+    else
+    begin
+      // Initialize en sit tabel in edit modus
+      tblRanglys.Edit;
+      iCount := 0;
+      suser := redInfo.Lines[4];
+
+      // Lyntjie mag nie leeg wees war username data in moet wees nie
+      if (redInfo.Lines[4] = '') or (redInfo.Lines[4] = ' ') then
+      begin
+        showmessage('Please enter a Username.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Kyk of spelernaam 'n dubbelwaarde is
+      if suser <> tblRanglys['SpelerNaam'] then
+      begin
+        for i7 := 1 to iUN do
+        begin
+          if suser = arrSpelerNaam[i7] then
+          begin
+            inc(iCount);
+          end;
+        end;
+
+        if iCount = 1 then
+        begin
+          showmessage('Username may not be a duplicate value.');
+          closefile(myfile);
+          exit;
+        end;
+
+      end;
+      // Kyk of die spelernaam leeg is
+      if (redInfo.Lines[4] = '') or (redInfo.Lines[4] = ' ') then
+      begin
+        showmessage('Username may not be empty!');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Kyk of rang 'n heelgetal waarde is
+      Try
+        irang := strtoint(redInfo.Lines[1]);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage
+            ('Unexpectedly failed. Level needs to be an integer value!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      bvalid := false;
+
+      // Kyk of item bestaan (vanuit array)
+      i3 := 0;
+      while (bvalid = false) and (i3 <= i2) do
+      begin
+        inc(i3);
+        if redInfo.Lines[7] = arrItems[i3] then
+        begin
+          bvalid := true;
+        end;
+      end;
+
+      if bvalid = false then
+      begin
+        showmessage
+          ('You have to edit to an existing item for most expensive item.');
+        closefile(myfile);
+        exit;
+      end;
+
+      Writeln(myfile, sname + 'Changed: ' + redInfo.Lines[4]);
+
+      tblRanglys['Rang'] := strtoint(redInfo.Lines[1]);
+      tblRanglys['SpelerNaam'] := redInfo.Lines[4];
+      tblRanglys['DuursteItem'] := redInfo.Lines[7];
+
+      // Refresh dbgrid en post inligting
+      tblRanglys.Post;
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrRanglys;
+      closefile(myfile);
+
+      // Sit alles in array in...
+      iUN := 0;
+      tblRanglys.First;
+
+      while not tblRanglys.Eof and (iUN <= 300) do
+      begin
+        inc(iUN);
+        arrSpelerNaam[iUN] := tblRanglys['SpelerNaam'];
+        tblRanglys.Next;
+      end;
+
+    end;
+
+  end;
+
+end;
+
+procedure TForm2.pnlGrn2Click(Sender: TObject);
+VAR
+  sprys, suser, sItem, snewprice: string;
+  rprys: real;
+  i, i7, i3, irang, iCount: Integer;
+  myfile: textfile;
+  dTry: tdate;
+  bvalid: Boolean;
+begin
+  // Insert new record
+  rprys := 0;
+  sprys := '';
+  suser := '';
+  sItem := '';
+  snewprice := '';
+  i := 0;
+  i7 := 0;
+  i3 := 0;
+  irang := 0;
+  iCount := 0;
+  // Prepare textfile and check if exists to use for reports
+  AssignFile(myfile, 'report.txt');
+  if FileExists('report.txt') = true then
+  begin
+    Append(myfile);
+  end
+  else
+  begin
+    rewrite(myfile);
+    exit;
+  end;
+
+  with dmPAT do
+  begin
+    // Items table
+    if bItems = true then
+    begin
+      // Initialize
+      sprys := '';
+      rprys := 0;
+      snewprice := '';
+      sItem := redInfo.Lines[1];
+      iCount := 0;
+
+      // Check if exists
+      for i7 := 1 to i2 do
+      begin
+        if sItem = arrItems[i7] then
+        begin
+          inc(iCount);
+        end;
+      end;
+
+      if iCount = 1 then
+      begin
+        showmessage('Item name may not be a duplicate value.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Kyk of item leeg is
+      if (sItem = '') or (sItem = ' ') then
+      begin
+        showmessage('Item name may not be empty.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Kyk of die datum, 'n datum waarde het deur te probeer omskep
+      Try
+        dTry := strtodate(redInfo.Lines[7]);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage
+            ('Unexpectedly failed. Date needs to be in format yyyy/mm/dd!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      tblItems.Append;
+
+      // Prys moet float wees sonder , op my regional settings ->
+      sprys := copy(redInfo.Lines[4], 2, length(redInfo.Lines[4]) - 1);
+      // vat net die getalle van die prys (nie R waardes nie)
+      for i := 1 to length(sprys) do
+      begin
+        if (sprys[i] in ['0' .. '9']) or (sprys[i] = '.') then
+        begin
+          snewprice := snewprice + sprys[i];
+        end;
+      end;
+
+      // toets hierna of prys steeds reg is (Regional settings)
+      Try
+        rprys := strtofloat(snewprice);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage('Unexpectedly failed. Price needs to be numbers!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      // Skryf oor
+      tblItems.insert;
+      tblItems['Item'] := redInfo.Lines[1];
+
+      Writeln(myfile, 'NEW ITEM');
+      Writeln(myfile, redInfo.Lines[1]);
+      tblItems['Prys'] := strtofloat(snewprice);
+      Writeln(myfile, 'Price: ' + snewprice);
+      tblItems['ItemSeisoen'] := strtodate(redInfo.Lines[7]);
+      Writeln(myfile, 'Season: ' + redInfo.Lines[7]);
+      // Refresh dbgrid
+      dmPAT.tblItems.Post;
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrItems;
+      closefile(myfile);
+
+      // Sit alles in array in...
+      i2 := 0;
+      tblItems.First;
+
+      while not tblItems.Eof and (i2 <= 300) do
+      begin
+        inc(i2);
+        arrItems[i2] := tblItems['Item'];
+        tblItems.Next;
+      end;
+    end
+    else
+    begin
+      if (redInfo.Lines[4] = '') or (redInfo.Lines[4] = ' ') then
+      begin
+        showmessage('Please enter a Username.');
+        closefile(myfile);
+        exit;
+      end;
+      // initialize
+      iCount := 0;
+      suser := redInfo.Lines[4];
+
+      // toets of daar 'n duplicate value is
+      for i7 := 1 to iUN do
+      begin
+        if suser = arrSpelerNaam[i7] then
+        begin
+          inc(iCount);
+        end;
+      end;
+
+      if iCount >= 1 then
+      begin
+        showmessage('Username may not be a duplicate value.');
+        closefile(myfile);
+        exit;
+      end;
+
+      Try
+        irang := strtoint(redInfo.Lines[1]);
+
+      Except
+        on EConvertError do
+        begin
+          showmessage
+            ('Unexpectedly failed. Level needs to be an integer value!');
+          closefile(myfile);
+          exit;
+        end;
+      end;
+
+      // Item Inserted to player without item existing
+      bvalid := false;
+
+      i3 := 0;
+      while (bvalid = false) and (i3 <= i2) do
+      begin
+        inc(i3);
+        if redInfo.Lines[7] = arrItems[i3] then
+        begin
+          bvalid := true;
+        end;
+      end;
+
+      if bvalid = false then
+      begin
+        showmessage
+          ('You have to edit to an existing item for most expensive item.');
+        closefile(myfile);
+        exit;
+      end;
+
+      // Skryf oor
+      Writeln(myfile, 'NEW PLAYER');
+      Writeln(myfile, 'Level: ' + redInfo.Lines[1]);
+
+      tblRanglys.insert;
+      tblRanglys['Rang'] := strtoint(redInfo.Lines[1]);
+      tblRanglys['SpelerNaam'] := redInfo.Lines[4];
+
+      Writeln(myfile, 'Username: ' + redInfo.Lines[4]);
+
+      tblRanglys['DuursteItem'] := redInfo.Lines[7];
+
+      Writeln(myfile, 'Most Expensive Item: ' + redInfo.Lines[7]);
+
+      // Refresh dbgrid en post inligting
+      dmPAT.tblRanglys.Post;
+
+      // Sit alles in array in...
+      iUN := 0;
+      tblRanglys.First;
+      while not tblRanglys.Eof and (iUN <= 300) do
+      begin
+        inc(iUN);
+        arrSpelerNaam[iUN] := tblRanglys['SpelerNaam'];
+        tblRanglys.Next;
+      end;
+
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrRanglys;
+      closefile(myfile);
+
+    end;
+  end;
+
+end;
+
+procedure TForm2.pnlGrn3Click(Sender: TObject);
+begin
+  with dmPAT do
+  begin
+    if bItems = true then
+    begin
+      tblItems.Delete;
+      // Add to array again...
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrItems;
+      i2 := 0;
+      tblItems.First;
+
+      while not tblItems.Eof and (i2 <= 300) do
+      begin
+        inc(i2);
+        arrItems[i2] := tblItems['Item'];
+        tblItems.Next;
+      end;
+    end
+    else
+    begin
+      tblRanglys.Delete;
+
+      dbgInfo.DataSource := nil;
+      dbgInfo.DataSource := dmPAT.dsrRanglys;
+      bItems := false;
+
+      // Sit alles in array in...
+      iUN := 0;
+      tblRanglys.First;
+
+      while not tblRanglys.Eof and (iUN <= 300) do
+      begin
+        inc(iUN);
+        arrSpelerNaam[iUN] := tblRanglys['SpelerNaam'];
+        tblRanglys.Next;
+      end;
+    end;
+
+  end;
+end;
+
+procedure TForm2.pnlGrn4Click(Sender: TObject);
+VAR
+  iNum, i: Integer;
+  sprys, snewprice: string;
+  rprys: real;
+begin
+
+  if bItems = true then
+  begin
+    sprys := redInfo.Lines[4];
+    // Vat net getal waardes van prys
+    for i := 1 to length(sprys) do
+    begin
+      if (sprys[i] in ['0' .. '9']) or (sprys[i] = '.') then
+      begin
+        snewprice := snewprice + sprys[i];
+      end;
+
+    end;
+
+    // Probeer prys dan weer na getalle omskakel
+    Try
+      rprys := strtofloat(snewprice);
+    Except
+      on EConvertError do
+      begin
+        showmessage('Unexpectedly failed. Price needs to be numbers!');
+        exit;
+      end;
+    end;
+
+    // Kry net die heelgetal waarde van rprys, sodat ons akkuraat
+    // kan toets of die heelgetal gedeelte 'n priemgetal is of nie
+    iNum := trunc(rprys);
+
+    // Wys of prys 'n priemgetal is
+    if bPrime(iNum) = true then
+    begin
+      showmessage('This item will be popular amongst the players.')
+    end
+    else
+    begin
+      showmessage('This item will not be popular amongst the players.');
+    end;
+
+  end
+  else
+  begin
+    // Vir ingeval iemand nie die items sien nie en steeds wil kyk of die prys
+    // 'n priemgetal is
+    showmessage('You have to be on the Item-View to use this function!')
+  end;
+end;
+
+procedure TForm2.pnlHeaderClick(Sender: TObject);
+begin
+  // Wys vir toetsdoeleindes
+  tbsMessage.Visible := true;
+end;
+
+procedure TForm2.pnlHeadermsgClick(Sender: TObject);
+begin
+  // Wys vir toetsdoeleindes
+  tbsMessage.Visible := false;
+  tbsItems.Visible := true;
+end;
+
+procedure TForm2.pnlInfoClick(Sender: TObject);
+begin
+  // Wys vir toetsdoeleindes
+  tbsMessage.Visible := true;
+end;
+
+procedure TForm2.pnlItemsClick(Sender: TObject);
+var
+  sprys: string;
+  rprys: real;
+begin
+
+  // Gee 'n datasource waarde
+  // Maak bItems = true, sodat ons maklik kan wys/edit/insert/delete waar nodig
+  dbgInfo.DataSource := dmPAT.dsrItems;
+  bItems := true;
+  redInfo.Lines.Clear;
+  with dmPAT do
+  begin
+    //
+    if bItems = true then
+    begin
+      sprys := currtostr(tblItems['Prys']);
+      rprys := strtofloat(sprys);
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+  end;
+end;
+
+procedure TForm2.pnlLogInClick(Sender: TObject);
+var
+  i, ipin: Integer;
+  sIpin, sIname, sgender: string;
+  cGender: char;
+begin
+  // Check gender
+  sgender := edtGender.Text;
+  sgender := sgender + ' ';
+  cGender := sgender[1];
+  lblFaulty.Caption := '';
+
+  if length(sgender) <> 2 then
+  begin
+    lblFaulty.Caption := '';
+    lblFaulty.Caption := 'Gender can only be displayed as one letter';
+    exit;
+  end;
+  lblFaulty.Caption := '';
+  if (upcase(cGender) = 'M') or (upcase(cGender) = 'F') then
+  begin
+    cGender := 'V'; // V is for Valid
+  end
+  else
+  begin
+    lblFaulty.Caption := '';
+    lblFaulty.Caption := 'Please enter a gender in M/F format';
+    exit;
+  end;
+
+  // Input names and pins
+  sIpin := edtPin.Text;
+  sIname := edtName.Text;
+  imgProfile.picture.LoadFromFile('pfp.png');
+  imgProfile.Proportional := true;
+
+  // Check if the pin consists only of numbers through exception handling
+  lblFaulty.Caption := '';
+  Try
+    ipin := strtoint(sIpin);
+
+  Except
+    on EConvertError do
+    begin
+      lblFaulty.Caption := '';
+      lblFaulty.Caption := 'Pin needs to be numbers!';
+      exit;
+    end;
+  end;
+
+  // Check if the pin consists only of numbers
+  // for i := 1 to length(sIpin) do
+  // begin
+  // if not(sIpin[i] in ['0' .. '9']) then
+  // begin
+
+  // lblFaulty.Caption := 'Only numbers may be used in the pin!';
+  // exit;
+  // end
+  // else
+  // begin
+  lblFaulty.Caption := '';
+  if length(sIpin) <> 4 then
+  begin
+
+    lblFaulty.Caption := 'Only four numbers may be used in the pin!';
+    exit;
+  end;
+  // end;
+  // end;
+
+  // Test if username is correct
+  lblFaulty.Caption := '';
+  for i := 1 to length(sIname) do
+  begin
+    if not(upcase(sIname[i]) in ['A' .. 'Z']) then
+    begin
+
+      lblFaulty.Caption := 'Username may only consist of letters!';
+      exit;
+    end;
+
+  end;
+
+  // Check which username is being used and then check if the
+  // username matches the pin
+  for i := 1 to inume do
+  begin
+    if sIname = arrNames[i] then
+    begin
+      sname := arrNames[i];
+      if sIpin = arrPins[i] then
+      begin
+        tbsSignIn.Visible := false;
+
+        tbsMessage.Visible := false;
+        tbsItems.Visible := true;
+        lblNameWelcome.Caption := sname;
+        exit;
+
+      end
+    end;
+  end;
+end;
+
+procedure TForm2.pnlNextClick(Sender: TObject);
+VAR
+  sprys: string;
+  rprys: real;
+begin
+  with dmPAT do
+  begin
+    // Wys die volgende waarde in tabel
+    if bItems = true then
+    begin
+      tblItems.Next;
+
+    end
+    else
+    begin
+      tblRanglys.Next;
+    end;
+
+    redInfo.Lines.Clear;
+
+    // Vertoon die volgende waarde in die rich edit
+    if bItems = true then // wys item waardes
+    begin
+      sprys := currtostr(tblItems['Prys']); // verander die waardes na strings
+      rprys := strtofloat(sprys); // -----------------> om te vertoon
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin // wys speler waardes
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+
+  end;
+end;
+
+procedure TForm2.pnlPreviousClick(Sender: TObject);
+VAR
+  sprys: string;
+  rprys: real;
+
+begin
+  with dmPAT do
+  begin
+    // Wys die vorige waarde in tabel
+    if bItems = true then
+    begin
+      tblItems.prior;
+
+    end
+    else
+    begin
+      tblRanglys.prior;
+    end;
+
+    redInfo.Lines.Clear;
+    // Vertoon die vorige waarde in die rich edit
+    if bItems = true then // wys item waardes
+    begin
+      sprys := currtostr(tblItems['Prys']); // verander die waardes na strings
+      rprys := strtofloat(sprys); // -----------------> om te vertoon
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin // wys speler waardes
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+
+  end;
+
+end;
+
+procedure TForm2.pnlRangClick(Sender: TObject);
+VAR
+  sprys: string;
+  rprys: real;
+begin
+  // Gee weer 'n source waarde om die ranglys die keer te vertoon
+  dbgInfo.DataSource := dmPAT.dsrRanglys;
+  bItems := false;
+  redInfo.Lines.Clear;
+  with dmPAT do
+  begin // Kode vanaf voorheen in PAT gekopie en geplak
+    // vertoon alle item waardes in die richedit as bitems steeds waar is
+    if bItems = true then
+    begin
+      sprys := currtostr(tblItems['Prys']);
+      rprys := strtofloat(sprys);
+      sprys := floattostrf(rprys, ffcurrency, 6, 2);
+      redInfo.Lines.Add('Item: ' + #13 + tblItems['Item'] + #13);
+      redInfo.Lines.Add('Price: ' + #13 + sprys + #13);
+      redInfo.Lines.Add('Season: ' + #13 + datetostr(tblItems['ItemSeisoen']));
+
+    end
+    else
+    begin // vertoon alle rang waardes in rich edit
+      redInfo.Lines.Add('Level: ' + #13 + inttostr(tblRanglys['Rang']) + #13);
+      redInfo.Lines.Add('Username: ' + #13 + (tblRanglys['SpelerNaam']) + #13);
+      redInfo.Lines.Add('Most Expensive Item: ' + #13 + tblRanglys
+        ['DuursteItem']);
+    end;
+  end;
+end;
+
+procedure TForm2.sbxSearchDelChange(Sender: TObject);
+begin
+  with dmPAT do
+  begin
+
+    if bItems = true then
+    begin
+      tblItems.First;
+
+      while not tblItems.Eof do
+      begin
+        if tblItems['Item'] = sbxSoek.Text then
+        begin
+        //vertoon boodksap dat rekord gevind is
+
+          tblItems.Delete;
+                    showmessage('Record found and deleted.');
+          exit;
+        end
+        else
+        begin
+          // lees deur tabel tot dat waarde gekry is
+          tblItems.Next;
+        end;
+
+      end;
+
+    end
+    else
+    begin
+      while not tblRanglys.Eof do
+      begin
+        if tblRanglys['SpelerNaam'] = sbxSearchDel.Text then
+        begin
+        //vertoon boodksap dat rekord gevind is
+
+          tblRanglys.Delete;
+                    showmessage('Record found and deleted.');
+          exit;
+        end
+        else
+        begin
+          // lees deur tabel tot dat waarde gekry is
+          tblItems.Next;
+        end;
+
+      end;
+    end;
+  end;
+end;
+
+procedure TForm2.sbxSoekChange(Sender: TObject);
+begin
+ //gebruik on change sodat gebeure maklik vloei
+  with dmPAT do
+  begin
+
+    if bItems = true then
+    begin
+      tblItems.First;
+
+      while not tblItems.Eof do
+      begin
+        if tblItems['Item'] = sbxSoek.Text then
+        begin
+        //vertoon boodksap dat rekord gevind is
+          showmessage('Record found.');
+
+          exit;
+        end
+        else
+        begin
+        //lees deur tabel tot dat waarde gekry is
+          tblItems.Next;
+        end;
+
+      end;
+
+    end
+    else
+    begin
+      while not tblRanglys.Eof do
+      begin
+        if tblRanglys['SpelerNaam'] = sbxSearchDel.Text then
+        begin
+        //vertoon boodksap dat rekord gevind is
+          showmessage('Record found.');
+
+          exit;
+        end
+        else
+        begin
+        //lees deur tabel tot dat waarde gekry is
+          tblItems.Next;
+        end;
+
+      end;
+    end;
+  end;
+end;
+
+end.
+
+// Username:
+// JuffrouBischoff
+
+// Pin:
+// 1234

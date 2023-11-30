@@ -1,0 +1,47 @@
+object dmPAT: TdmPAT
+  Height = 480
+  Width = 640
+  object conRH: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\Users\2022bothar' +
+      '\Desktop\PAT Folder\Win32\Debug\Database.mdb;Persist Security In' +
+      'fo=False'
+    LoginPrompt = False
+    Mode = cmShareDenyNone
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 96
+    Top = 56
+  end
+  object tblItems: TADOTable
+    Connection = conRH
+    TableName = 'Items'
+    Left = 232
+    Top = 136
+  end
+  object tblRanglys: TADOTable
+    Connection = conRH
+    TableName = 'lRanglys'
+    Left = 240
+    Top = 64
+  end
+  object ADOQuery1: TADOQuery
+    Parameters = <>
+    Left = 224
+    Top = 216
+  end
+  object dsrItems: TDataSource
+    DataSet = tblItems
+    Left = 336
+    Top = 56
+  end
+  object dsrRanglys: TDataSource
+    DataSet = tblRanglys
+    Left = 416
+    Top = 200
+  end
+  object DataSource3: TDataSource
+    Left = 424
+    Top = 72
+  end
+end

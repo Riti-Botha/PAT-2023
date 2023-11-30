@@ -1,0 +1,46 @@
+object dmPAT: TdmPAT
+  Height = 600
+  Width = 800
+  PixelsPerInch = 120
+  object conRH: TADOConnection
+    Connected = True
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;User ID=Admin;Data Source=D:\PA' +
+      'T\PAT Folder - Copy\PAT Folder - Copy\Win32\Debug\RoyaleHighData' +
+      '.mdb;Mode=Share Deny None;Persist Security Info=False;Jet OLEDB:' +
+      'System database="";Jet OLEDB:Registry Path="";Jet OLEDB:Database' +
+      ' Password="";Jet OLEDB:Engine Type=5;Jet OLEDB:Database Locking ' +
+      'Mode=1;Jet OLEDB:Global Partial Bulk Ops=2;Jet OLEDB:Global Bulk' +
+      ' Transactions=1;Jet OLEDB:New Database Password="";Jet OLEDB:Cre' +
+      'ate System Database=False;Jet OLEDB:Encrypt Database=False;Jet O' +
+      'LEDB:Don'#39't Copy Locale on Compact=False;Jet OLEDB:Compact Withou' +
+      't Replica Repair=False;Jet OLEDB:SFP=False'
+    LoginPrompt = False
+    Mode = cmShareDenyNone
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 120
+    Top = 80
+  end
+  object tblItems: TADOTable
+    Connection = conRH
+    TableName = 'tblItems'
+    Left = 426
+    Top = 154
+  end
+  object tblRanglys: TADOTable
+    Connection = conRH
+    TableName = 'tblRanglys'
+    Left = 508
+    Top = 72
+  end
+  object dsrItems: TDataSource
+    DataSet = tblItems
+    Left = 420
+    Top = 70
+  end
+  object dsrRanglys: TDataSource
+    DataSet = tblRanglys
+    Left = 504
+    Top = 154
+  end
+end
