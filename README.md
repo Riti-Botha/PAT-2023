@@ -6,6 +6,9 @@
   - **Username:** Riti
   - **Password:** 2345
 
+#### Grade attained for project:
+100%
+
 ### Project Overview:
 This project was a graded assessment task developed in 2023, when I was in grade 11. It involved creating a Business Management Program with comments in Afrikaans due to my school's language.
 
