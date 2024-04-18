@@ -13,7 +13,7 @@
 This project was a graded assessment task developed in 2023, when I was in grade 11. It involved creating a Business Management Program with comments in Afrikaans due to my school's language.
 
 #### Project Focus:
-I chose to design an inventory management system for the popular Roblox game, Royale High.
+I chose to design an inventory management system for the popular Roblox game, Royale High. This system was not used as a real-world application. The focus of the project was to learn more about Databases.
 
 #### Development Tools:
 Utilized Microsoft Access for database management, Delphi for coding, and incorporated text files in alignment with the grading criteria.
